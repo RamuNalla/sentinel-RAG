@@ -1,0 +1,1 @@
+An enterprise-grade, agentic RAG gateway featuring self-correction, hallucination grading, semantic caching, and Corrective RAG (CRAG) web-fallback. Built entirely with local embeddings and LangGraph.
