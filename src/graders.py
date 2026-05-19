@@ -2,7 +2,7 @@ import sys
 import os
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableLambda
 from pydantic import BaseModel, Field
 
 # Ensure we can import config
@@ -80,6 +80,13 @@ answer_grader = answer_prompt | structured_llm_answer_grader
 # ==========================================
 # 4. Query Rewriter (Optimization)
 # ==========================================
+class RewrittenQuery(BaseModel):
+    """The rewritten, optimized version of the user's query."""
+    query: str = Field(description="The rewritten question without any preamble, explanations, or quotation marks.")
+
+# Force structured output
+structured_llm_rewriter = llm.with_structured_output(RewrittenQuery)
+
 system_prompt_rewriter = """You are a question re-writer that converts an input user question to a better version that is optimized \n 
      for vectorstore retrieval. Look at the input and try to reason about the underlying semantic intent / meaning."""
 
@@ -89,4 +96,17 @@ rewrite_prompt = ChatPromptTemplate.from_messages(
         ("human", "Here is the initial question: \n\n {question} \n Formulate an improved question."),
     ]
 )
-question_rewriter = rewrite_prompt | llm | StrOutputParser()
+
+def _coerce_rewritten_query(output) -> RewrittenQuery:
+    """Normalize rewriter output (Pydantic model, dict, or plain text)."""
+    if isinstance(output, RewrittenQuery):
+        return output
+    if isinstance(output, dict) and "query" in output:
+        return RewrittenQuery(query=str(output["query"]).strip())
+    if hasattr(output, "query") and not isinstance(output, str):
+        return RewrittenQuery(query=str(output.query).strip())
+    return RewrittenQuery(query=str(output).strip())
+
+
+# Connect the chain
+question_rewriter = rewrite_prompt | structured_llm_rewriter | RunnableLambda(_coerce_rewritten_query)
