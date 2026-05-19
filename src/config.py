@@ -1,15 +1,17 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from project root (works from notebooks/ too)
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(_PROJECT_ROOT / ".env")
 
 # API Keys
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Model configurations
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
-LLM_MODEL = "llama3-70b-8192"
+LLM_MODEL = "llama-3.3-70b-versatile"
 
 # Database path
 CHROMA_PATH = "chroma_db"
