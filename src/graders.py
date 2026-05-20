@@ -12,6 +12,11 @@ from src import config
 # Initialize the LLM (Temperature 0 is crucial for graders to be deterministic)
 llm = ChatGroq(model=config.LLM_MODEL, temperature=0)
 
+
+def is_grade_yes(binary_score: str) -> bool:
+    """Normalize grader output for routing comparisons."""
+    return str(binary_score).strip().lower() == "yes"
+
 # ==========================================
 # 1. Document Grader (Context Relevance)
 # ==========================================
