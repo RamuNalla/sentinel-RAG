@@ -11,7 +11,11 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Model configurations
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
+EMBEDDING_DEVICE = "cpu"  # use "mps" on Apple Silicon or "cuda" with GPU
 LLM_MODEL = "llama-3.3-70b-versatile"
+
+# Semantic cache: Chroma L2 distance — lower is more similar
+CACHE_DISTANCE_THRESHOLD = 0.25
 
 # Database path
 CHROMA_PATH = "chroma_db"

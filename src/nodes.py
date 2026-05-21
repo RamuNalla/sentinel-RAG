@@ -16,7 +16,7 @@ from src.graders import llm, retrieval_grader, question_rewriter, is_grade_yes
 # --- Setup Retriever ---
 embeddings = HuggingFaceEmbeddings(
     model_name=config.EMBEDDING_MODEL,
-    model_kwargs={'device': 'cpu'},
+    model_kwargs={'device': config.EMBEDDING_DEVICE},
     encode_kwargs={'normalize_embeddings': True}
 )
 vectorstore = Chroma(
