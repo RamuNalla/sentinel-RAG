@@ -2,6 +2,16 @@ import sys
 import os
 import time
 
+import phoenix as px
+from openinference.instrumentation.langchain import LangChainInstrumentor
+
+# Launch the local Phoenix server
+session = px.launch_app()
+print(f"👁️ Observability Dashboard running at: {session.url}")
+
+# Instrument LangChain to trace every LLM call automatically
+LangChainInstrumentor().instrument()
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from src import cache
 from src.graph import app
