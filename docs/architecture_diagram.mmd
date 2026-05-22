@@ -1,0 +1,28 @@
+flowchart LR
+    classDef user fill:#2d3436,stroke:#dfe6e9,stroke-width:2px,color:#fff
+    classDef cache fill:#0984e3,stroke:#74b9ff,stroke-width:2px,color:#fff
+    classDef agent fill:#6c5ce7,stroke:#a29bfe,stroke-width:2px,color:#fff
+    classDef db fill:#00b894,stroke:#55efc4,stroke-width:2px,color:#fff
+    classDef decision fill:#e17055,stroke:#fab1a0,stroke-width:2px,color:#fff
+    classDef web fill:#d63031,stroke:#ff7675,stroke-width:2px,color:#fff
+    classDef output fill:#00cec9,stroke:#81ecec,stroke-width:2px,color:#fff
+
+    A(["User Query"]):::user --> B{"Semantic Cache"}:::cache
+    B -.-> C[("Chroma Cache")]:::db
+    B -->|"Hit"| D(["Cached Answer"]):::output
+    B -->|Miss| E
+
+    subgraph ORCH["LangGraph Orchestrator"]
+        direction LR
+        E["Retrieve Docs"]:::agent --> G{"Doc Grade"}:::decision
+        G -->|Reject| H["Tavily Search"]:::web
+        G -->|Relevant| I["Generate Answer"]:::agent
+        H --> I
+        I --> J{"Answer Grade"}:::decision
+        J -->|Retry| I
+    end
+
+    F[("Vector DB")] -.-> E
+    J -->|Pass| K(["Final Answer"]):::output
+    K --> L[("Save Cache")]:::db
+    L -.-> C
