@@ -1,7 +1,6 @@
 import os
 import sys
 from typing import Dict
-
 from langchain_core.documents import Document
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -9,14 +8,16 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# Ensure imports work
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src import config
 from src.graders import llm, retrieval_grader, question_rewriter, is_grade_yes
 
+# --- Setup Retriever ---
 embeddings = HuggingFaceEmbeddings(
     model_name=config.EMBEDDING_MODEL,
-    model_kwargs={"device": config.EMBEDDING_DEVICE},
-    encode_kwargs={"normalize_embeddings": True},
+    model_kwargs={'device': config.EMBEDDING_DEVICE},
+    encode_kwargs={'normalize_embeddings': True}
 )
 vectorstore = Chroma(
     persist_directory=os.path.join(os.path.dirname(__file__), "..", config.CHROMA_PATH),
@@ -24,6 +25,7 @@ vectorstore = Chroma(
 )
 retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
+# --- Setup Generator ---
 prompt = PromptTemplate(
     template="""You are an assistant for question-answering tasks. 
     Use the following pieces of retrieved context to answer the question. 
@@ -41,8 +43,13 @@ def format_docs(docs):
 
 
 rag_chain = prompt | llm | StrOutputParser()
+
+# --- Setup Web Search ---
 web_search_tool = TavilySearchResults(k=3)
 
+# ==========================================
+# GRAPH NODES
+# ==========================================
 
 def retrieve(state: Dict):
     """Retrieve documents from vector store."""
